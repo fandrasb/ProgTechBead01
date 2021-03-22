@@ -2,9 +2,9 @@ package capitaly.field;
 import capitaly.player.Player;
 
 abstract public class Field {
-    protected int cost;
+    protected final int cost;
 
-    protected Field(int cost) {
+    protected Field(final int cost) {
         this.cost = cost;
     }
 
@@ -12,5 +12,5 @@ abstract public class Field {
         return cost;
     }
 
-    abstract public void visit(Player player);
+    abstract public void visit(final Player player);
 }

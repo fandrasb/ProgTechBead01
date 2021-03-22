@@ -5,8 +5,8 @@ import capitaly.field.RealEstateField;
 import capitaly.field.ServiceField;
 
 abstract public class Player {
+    protected final String name;
     protected int balance;
-    protected String name;
 
     public Player(String name) {
         this.name = name;
@@ -21,39 +21,68 @@ abstract public class Player {
         return this.balance;
     }
 
-    public void setBalance(int balance) {
+    public void setBalance(final int balance) {
         this.balance = balance;
     }
 
-    abstract public void visitField(RealEstateField field);
+    abstract protected void setStateOnFieldVisit();
+    abstract protected boolean buyRealEstateRequired(RealEstateField field);
+    abstract protected boolean buyHouseRequired(RealEstateField field);
 
     public void visitField(ServiceField field) {
+        setStateOnFieldVisit();
         this.balance -= field.getCost();
     }
 
     public void visitField(LuckField field) {
+        setStateOnFieldVisit();
         this.balance += field.getCost();
     }
 
-    protected void buyRealEstate(RealEstateField realEstate) {
-        if (balance >= 1000) {
-            balance -= 1000;
-            realEstate.setOwner(this);
+    public void visitField(RealEstateField field) {
+        setStateOnFieldVisit();
+
+        if (field.getOwner() == null) {
+            if (!buyRealEstateRequired(field)) {
+                return;
+            }
+
+            buyRealEstate(field);
+            return;
+        }
+
+        if (field.getOwner() != this) {
+            payOwner(field);
+            return;
+        }
+
+        if (!field.hasHouse()) {
+            if (!buyHouseRequired(field)) {
+                return;
+            }
+
+            buyHouse(field);
         }
     }
 
-    protected void buyHouse(RealEstateField realEstate) {
-        if (balance >= 4000) {
-            balance -= 4000;
-            realEstate.setHasHouse(true);
+    protected void buyRealEstate(RealEstateField field) {
+        if (balance >= field.getCost()) {
+            balance -= field.getCost();
+            field.setOwner(this);
         }
     }
 
-    protected void payOwner(RealEstateField realEstate) {
-        int payment = realEstate.hasHouse() ? 2000 : 500;
-        balance -= payment;
-        realEstate.getOwner().setBalance(
-            realEstate.getOwner().getBalance() + payment
+    protected void buyHouse(RealEstateField field) {
+        if (balance >= field.getHouseCost()) {
+            balance -= field.getHouseCost();
+            field.setHasHouse(true);
+        }
+    }
+
+    protected void payOwner(RealEstateField field) {
+        balance -= field.getPaymentAmt();
+        field.getOwner().setBalance(
+            field.getOwner().getBalance() + field.getPaymentAmt()
         );
     }
 }

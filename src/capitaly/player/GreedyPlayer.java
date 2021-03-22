@@ -8,19 +8,15 @@ public class GreedyPlayer extends Player {
     }
 
     @Override
-    public void visitField(RealEstateField field) {
-        if (field.getOwner() == null) {
-            buyRealEstate(field);
-            return;
-        }
+    protected void setStateOnFieldVisit() {}
 
-        if (field.getOwner() != this) {
-            payOwner(field);
-            return;
-        }
+    @Override
+    protected boolean buyRealEstateRequired(RealEstateField field) {
+        return true;
+    }
 
-        if (!field.hasHouse()) {
-            buyHouse(field);
-        }
+    @Override
+    protected boolean buyHouseRequired(RealEstateField field) {
+        return true;
     }
 }

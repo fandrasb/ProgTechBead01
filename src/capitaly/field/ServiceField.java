@@ -3,12 +3,12 @@ package capitaly.field;
 import capitaly.player.Player;
 
 public class ServiceField extends Field {
-    public ServiceField(int cost) {
+    public ServiceField(final int cost) {
         super(cost);
     }
 
     @Override
-    public void visit(Player player) {
+    public void visit(final Player player) {
         player.visitField(this);
     }
 }
