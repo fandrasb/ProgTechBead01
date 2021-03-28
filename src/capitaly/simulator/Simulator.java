@@ -15,16 +15,16 @@ import capitaly.player.GreedyPlayer;
 import capitaly.player.Player;
 import capitaly.player.TacticalPlayer;
 
-public class Simulator {
+abstract public class Simulator {
     final List<Field> board;
     final List<Player> players;
-    final List<Integer> diceRolls;
+    final List<Integer> playerPositions;
     int currentPlayerIndex;
 
-    public Simulator(final String setupFilePath, final String diceRollsFilePath) {
+    public Simulator(final String setupFilePath) {
         board = new ArrayList<>();
         players = new ArrayList<>();
-        diceRolls = new ArrayList<>();
+        playerPositions = new ArrayList<>();
         currentPlayerIndex = 0;
 
         try {
@@ -39,32 +39,9 @@ public class Simulator {
             System.out.println("File not found: " + setupFilePath);
             System.exit(1);
         }
-
-        try {
-            final var diceRollsFile = new File(diceRollsFilePath);
-            final var diceRollsScanner = new Scanner(diceRollsFile);
-
-            setupDiceRolls(diceRollsScanner);
-
-            diceRollsScanner.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found: " + diceRollsFilePath);
-            System.exit(1);
-        }
     }
 
-    public Player run() {
-        Player firstEliminatedPlayer = null;
-        for (
-            var i = 0;
-            i < diceRolls.size() && firstEliminatedPlayer == null;
-            ++i
-        ) {
-            firstEliminatedPlayer = runTurn(diceRolls.get(i));
-        }
-
-        return firstEliminatedPlayer;
-    }
+    abstract public Player run();
 
     public List<Field> getBoard() {
         return new ArrayList<>(board);
@@ -74,21 +51,30 @@ public class Simulator {
         return new ArrayList<>(players);
     }
 
-    public List<Integer> getDiceRolls() {
-        return new ArrayList<>(diceRolls);
-    }
-
     protected Player runTurn(final int diceRoll) {
         final var player = players.get(currentPlayerIndex);
+        final var field = board.get(getPlayerPosition(diceRoll));
 
-        // @todo
+        field.visit(player);
 
+        if (player.getBalance() < 0) {
+            return player;
+        }
         endTurn();
         return null;
     }
 
+    protected Integer getPlayerPosition(Integer diceRoll) {
+        final var formerPosition = playerPositions.get(currentPlayerIndex);
+        final var newPosition = ((formerPosition + diceRoll) % board.size());
+        playerPositions.set(currentPlayerIndex, newPosition);
+
+        return newPosition;
+    }
+
     protected void endTurn() {
-        currentPlayerIndex = players.size() % ++currentPlayerIndex;
+        ++currentPlayerIndex;
+        currentPlayerIndex = currentPlayerIndex % players.size();
     }
 
     protected void setupBoard(final Scanner scanner) {
@@ -108,6 +94,7 @@ public class Simulator {
             final var player = playerFactory(values);
 
             players.add(player);
+            playerPositions.add(0);
         }
     }
 
@@ -150,14 +137,6 @@ public class Simulator {
             default: {
                 return new GreedyPlayer(values[0]);
             }
-        }
-    }
-
-    protected void setupDiceRolls(Scanner scanner) {
-        while (scanner.hasNextLine()) {
-            final var line = scanner.nextLine();
-            System.out.println(line);
-            diceRolls.add(Integer.parseInt(line));
         }
     }
 }

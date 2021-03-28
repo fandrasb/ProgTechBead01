@@ -1,6 +1,7 @@
 package capitaly;
 
 import capitaly.player.Player;
+import capitaly.simulator.RandomDiceRollSimulator;
 import capitaly.simulator.Simulator;
 
 import java.io.File;
@@ -21,27 +22,20 @@ public class Main {
             TEST_RESOURCES_PATH +
             "/" +
             testDiceRollsFileNumber +
-            "-dice-rolls-test.txt;"
+            "-dice-rolls-test.txt"
         );
     }
 
     public static void main(String[] args) {
-        final var simulator = new Simulator(
-            getTestFilePath("01"),
-            getTestDiceRollsFilePath("01")
+        final var simulator = new RandomDiceRollSimulator(
+                getTestFilePath("01")
         );
 
-        System.out.println(simulator.getBoard().size());
-        System.out.println(simulator.getPlayers().size());
-        System.out.println(simulator.getDiceRolls());
-
-        // @todo
-        // final Player firstEliminated = simulator.run();
-        // printResults(firstEliminated);
+        final Player firstEliminated = simulator.run();
+        printResults(firstEliminated);
     }
 
     private static void printResults(final Player player) {
-
         System.out.println(
             "Simulation results:\nThe first player to be eliminated was:\n" +
             player.getName()
