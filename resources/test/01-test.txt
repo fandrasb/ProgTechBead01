@@ -1,0 +1,14 @@
+9
+Service 500
+Service 600
+Luck 700
+RealEstate
+RealEstate
+RealEstate
+Service 800
+Luck 500
+Luck 10000
+Player1 Greedy
+Player2 Tactical
+Player3 Greedy
+Player4 Cautious
